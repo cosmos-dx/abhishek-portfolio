@@ -6,6 +6,7 @@ import { Experience } from "@/components/sections/Experience";
 import { Stack } from "@/components/sections/Stack";
 import { Writing } from "@/components/sections/Writing";
 import { AbhishekAIChat } from "@/components/sections/Chat";
+import { ChatFab } from "@/components/ChatFab";
 import { Footer } from "@/components/sections/Footer";
 
 // Content is edited at runtime from /admin and stored on a volume, so render per request.
@@ -25,6 +26,7 @@ export default async function Home() {
         <AbhishekAIChat mode={process.env.LLM_API_KEY ? "live" : "demo"} />
       </main>
       <Footer profile={c.profile} />
+      <ChatFab />
     </>
   );
 }
