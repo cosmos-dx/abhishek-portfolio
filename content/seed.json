@@ -1,0 +1,418 @@
+{
+  "profile": {
+    "first": "Abhishek",
+    "last": "Gupta",
+    "roles": [
+      "AI Developer",
+      "Backend Engineer",
+      "System Builder"
+    ],
+    "labels": [
+      "Agentic Systems",
+      "Harness Engineering",
+      "Backend Architecture",
+      "Real-world Products"
+    ],
+    "location": "Bangalore, India",
+    "coords": "12.9716° N / 77.5946° E",
+    "tagline": "Build → Scale → Optimise.",
+    "bio": "I build backend systems and AI products that hold up in the real world: Go and Python services, event-driven workers, agent harnesses and retrieval, with cost and reliability designed in.",
+    "currently": {
+      "title": "Currently",
+      "items": [
+        "Building systems",
+        "Optimising tokens",
+        "Solving real problems"
+      ]
+    },
+    "email": "",
+    "github": "https://github.com/cosmos-dx",
+    "linkedin": "https://www.linkedin.com/in/abhishek-gupta-a1a44a203",
+    "resumeUrl": "",
+    "images": {
+      "hero": "/images/hero-architecture.jpg",
+      "mountain": "/images/hero-mountain.jpg",
+      "signal": "/images/hero-signal.jpg",
+      "experience": "/images/experience-building.jpg"
+    }
+  },
+  "projects": {
+    "featured": {
+      "slug": "hireish",
+      "name": "Hireish",
+      "url": "https://hireish.in",
+      "tagline": "An AI interviewer for technical hiring.",
+      "description": "One link runs the interview loop. Hireish conducts live voice, coding and system design rounds, asks real follow-ups, scores six dimensions as it goes, and produces an evidence-backed report the moment the interview ends.",
+      "role": "Full-stack builder",
+      "image": "/images/hireish-stage.jpg",
+      "screenshot": "/images/hireish-tour.jpg",
+      "tech": [
+        "Go",
+        "Python",
+        "React",
+        "TypeScript",
+        "OpenAI Realtime",
+        "PostgreSQL",
+        "Redis",
+        "AWS"
+      ],
+      "problem": "Technical hiring is slow and inconsistent. First-round screens burn senior engineers' time, five interviewers apply five different bars, and decisions rest on gut feel with no shared evidence trail.",
+      "solution": "A live AI interviewer that runs the round end to end. It conducts voice interviews over the OpenAI Realtime API, runs coding in a sandboxed editor and system design on a diagram canvas, scores each answer against a configurable rubric, runs anti-cheat in the background, and ships a PDF report with verbatim quotes and a hiring recommendation.",
+      "architecture": [
+        {
+          "name": "UI",
+          "role": "React + TypeScript web app for recruiters and candidates."
+        },
+        {
+          "name": "Gatekeeper",
+          "role": "Go (Gin) API gateway: auth, billing and quota."
+        },
+        {
+          "name": "Alchemists",
+          "role": "Python service for interview orchestration, AI workflow and reports."
+        },
+        {
+          "name": "Dumbledore",
+          "role": "Realtime voice interviews over WebSockets with bidirectional audio streaming."
+        },
+        {
+          "name": "Candidate / CDS",
+          "role": "Candidate and core data services."
+        },
+        {
+          "name": "Redis + Nginx",
+          "role": "Caching and routing, HTTPS in production."
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Go for the edge, Python for the AI",
+          "body": "High-throughput API and gateway work lives in Go. Interview orchestration and ML integration live in Python, where the tooling is. Each service deploys independently."
+        },
+        {
+          "title": "Coding and design as first-class rounds",
+          "body": "Candidates write code in a Monaco editor backed by a sandboxed Judge0 runtime and sketch architectures on a React Flow canvas, so the interviewer can probe real work instead of recitations."
+        },
+        {
+          "title": "Anti-cheat as a pipeline, not a checkbox",
+          "body": "Face and head-pose detection with MediaPipe, keystroke confidence scoring, prompt-injection filtering, and a WebSocket observer mode that lets a committee watch live."
+        },
+        {
+          "title": "Model routing per workload",
+          "body": "Realtime voice moved to a mini realtime model and the evaluation LLM to a smaller model, with per-organisation model selection so quality and cost are a setting, not a rewrite."
+        },
+        {
+          "title": "Spend fewer tokens before spending fewer dollars",
+          "body": "A client-side energy gate drops silent audio before it is sent, transcript checks avoid full responses to filler, and the system prompt was trimmed from about 3,500 to about 1,800 characters."
+        },
+        {
+          "title": "Cache what repeats",
+          "body": "Relevance filtering, embeddings and confidence scoring are cached on SHA-256 keys with TTLs, so identical work skips the LLM call entirely."
+        },
+        {
+          "title": "Measure per interview",
+          "body": "Token and audio usage are recorded per interview with an estimated cost, exposed through a cost breakdown API."
+        }
+      ],
+      "tradeoffs": [
+        "Smaller models cut cost sharply but give up some depth; the premium realtime model stays available per organisation.",
+        "Six microservices isolate concerns and scale independently, at the price of more deployment and observability surface.",
+        "Audio gating saves tokens but a threshold that is too aggressive could clip quiet speakers, so it is tuned conservatively."
+      ],
+      "outcomes": [
+        "Live in production at hireish.in.",
+        "Projected LLM cost per interview hour fell from about $4.14 to about $0.70 (about 83%) across the documented optimisation phases. This is a projection from the cost model, not measured billing.",
+        "Interview reports include six scored dimensions, verbatim quotes and a Strong yes to No recommendation."
+      ],
+      "subProducts": [
+        {
+          "name": "Roast My Resume",
+          "url": "https://www.hireish.in/ats-resume-checker",
+          "description": "A free ATS resume checker by Hireish. Upload a PDF, get a score out of 100, see every mistake marked with the fix, and get a rebuilt one-page resume.",
+          "image": "/images/resumehunter-sample-roast.jpg",
+          "points": [
+            "Score out of 100 in about 30 seconds",
+            "ATS and recruiter checks, every mistake with the fix",
+            "Free rebuilt one-page resume, never invents metrics"
+          ]
+        }
+      ]
+    },
+    "other": [
+      {
+        "name": "SBANetwork",
+        "year": "2025",
+        "description": "A lightweight, CPU-based neural network library inspired by Keras: Dense and Dropout layers, six optimizers, fourteen activation functions and five loss functions. Published on PyPI under the MIT licence.",
+        "url": "https://pypi.org/project/sbanetwork/",
+        "tech": [
+          "Python",
+          "NumPy",
+          "PyPI"
+        ]
+      },
+      {
+        "name": "AllOne",
+        "year": "",
+        "description": "A secure password manager with a TOTP authenticator and AI-powered document search.",
+        "url": "https://allone.co.in",
+        "tech": [
+          "Web",
+          "Flutter",
+          "Python",
+          "Firebase"
+        ]
+      }
+    ]
+  },
+  "experience": [
+    {
+      "company": "Orange Health Labs",
+      "url": "https://www.linkedin.com/company/orange-health",
+      "role": "Software Development Engineer 1",
+      "location": "Bangalore, India",
+      "start": "May 2026",
+      "end": "Present",
+      "points": [
+        "Cut report generation latency through backend workflow optimisation and rendering pipeline improvements.",
+        "Built Zest, an internal AI triage tool that classifies incoming Freshdesk tickets, flags missing information, drafts customer replies with an LLM and syncs ticket status, automating triage from intake through RCA.",
+        "Architected Jarvis, an AI code-intelligence platform indexing 63 repositories with a vectorless hybrid RAG pipeline (tree-sitter AST parsing, dependency graphs with Leiden community detection, BM25 and FTS5), lifting answer accuracy from about 55% to about 90% with 40x faster indexing.",
+        "Built 8+ autonomous agents inside Jarvis: a JIRA-to-PR pipeline (triage, code generation, self-review, publish), a production RCA investigator querying databases, SigNoz and Sentry with memory-backed deduplication, an inline PR reviewer and a natural-language SQL agent.",
+        "Migrated reporting infrastructure from Jinja2 to Marko.js for faster rendering, easier maintenance and better scalability."
+      ]
+    },
+    {
+      "company": "Orange Health Labs",
+      "url": "https://www.linkedin.com/company/orange-health",
+      "role": "Associate Software Engineer",
+      "location": "Bangalore, India",
+      "start": "Aug 2025",
+      "end": "Apr 2026",
+      "points": [
+        "Designed and scaled distributed backend systems in Go for high-volume lab operations and concurrent customer workflows.",
+        "Built event-driven pipelines and a worker-consumer architecture on Redis and Memcache for asynchronous orchestration and low-latency processing."
+      ]
+    },
+    {
+      "company": "Orange Health Labs",
+      "url": "https://www.linkedin.com/company/orange-health",
+      "role": "Software Engineer Intern",
+      "location": "Bangalore, India",
+      "start": "May 2025",
+      "end": "Aug 2025",
+      "points": [
+        "Designed and built the web interface for the Central Data System, streamlining internal data access for operations teams.",
+        "Worked with product and operations teams to ship reporting improvements."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "school": "Netaji Subhas University of Technology (NSUT)",
+      "degree": "M.Tech, Artificial Intelligence",
+      "location": "Delhi, India",
+      "start": "Jul 2024",
+      "end": "Jul 2026",
+      "note": ""
+    },
+    {
+      "school": "Dr. A.P.J. Abdul Kalam Technical University (AKTU)",
+      "degree": "B.Tech, Computer Science Engineering",
+      "location": "Lucknow, India",
+      "start": "Dec 2020",
+      "end": "May 2024",
+      "note": ""
+    }
+  ],
+  "stack": [
+    {
+      "category": "Languages",
+      "items": [
+        "Go",
+        "Python",
+        "TypeScript",
+        "JavaScript",
+        "SQL"
+      ]
+    },
+    {
+      "category": "Backend",
+      "items": [
+        "GORM",
+        "gRPC",
+        "Gin",
+        "Django",
+        "FastAPI",
+        "Node.js",
+        "REST APIs",
+        "Worker / Consumer"
+      ]
+    },
+    {
+      "category": "Data",
+      "items": [
+        "PostgreSQL",
+        "MongoDB",
+        "Redis",
+        "Memcache",
+        "Firestore"
+      ]
+    },
+    {
+      "category": "AI",
+      "items": [
+        "Gen AI",
+        "Agentic Systems",
+        "Harness",
+        "RAGs",
+        "Evals",
+        "Claude",
+        "Cursor",
+        "OpenAI"
+      ]
+    },
+    {
+      "category": "Infrastructure",
+      "items": [
+        "Docker",
+        "Kubernetes",
+        "AWS",
+        "CI/CD"
+      ]
+    },
+    {
+      "category": "Frontend",
+      "items": [
+        "React",
+        "Next.js",
+        "Tailwind CSS",
+        "Flutter"
+      ]
+    }
+  ],
+  "writing": [
+    {
+      "title": "From prompt engineering to decision engineering",
+      "summary": "A year ago we were engineering prompts; now we're starting to engineer decisions. On how the abstraction layer of AI work is shifting.",
+      "readTime": "LinkedIn · Sep 2026",
+      "status": "published",
+      "url": "https://www.linkedin.com/posts/abhishek-gupta-a1a44a203_from-prompt-engineering-to-decision-engineering-activity-7508225551971770368-1PcQ",
+      "image": "/images/writing-devtools.jpg"
+    },
+    {
+      "title": "I evaluated every major code retrieval architecture",
+      "summary": "A comparison of code retrieval approaches for code intelligence, from vector RAG to GraphRAG with Leiden community detection.",
+      "readTime": "LinkedIn · May 2026",
+      "status": "published",
+      "url": "https://www.linkedin.com/posts/abhishek-gupta-a1a44a203_i-evaluated-every-major-code-retrieval-architecture-activity-7463978686891933696-7Z6j",
+      "image": "/images/writing-rag.jpg"
+    },
+    {
+      "title": "Cutting LLM token costs in dev workflows",
+      "summary": "An MCP layer so AI coding tools stop shipping the whole workspace on every new chat. Followed up with a smarter retrieval layer.",
+      "readTime": "LinkedIn · Apr 2026",
+      "status": "published",
+      "url": "https://www.linkedin.com/posts/abhishek-gupta-a1a44a203_llm-ai-developertools-activity-7450752377680236544-HO6c",
+      "image": "/images/writing-cost.jpg"
+    }
+  ],
+  "faq": [
+    {
+      "q": "Tell me about Hireish.",
+      "a": "Hireish is an AI interviewer for technical hiring, live at hireish.in. It runs voice, coding and system design rounds, asks follow-ups, scores six dimensions live and produces an evidence-backed report. Abhishek built it as six Go and Python microservices with a React 19 front end, OpenAI Realtime for voice, a Judge0 sandbox for code and MediaPipe-based anti-cheat.",
+      "keywords": [
+        "hireish",
+        "interview",
+        "interviewer",
+        "hiring"
+      ]
+    },
+    {
+      "q": "What systems have you built?",
+      "a": "Hireish (a multi-service AI interview platform), distributed Go backend systems with a worker-consumer architecture at Orange Health Labs, Jarvis (an AI code-intelligence platform with 8+ agents), Zest (an AI ticket triage tool), and side projects like SBANetwork and AllOne.",
+      "keywords": [
+        "systems",
+        "built",
+        "projects",
+        "work",
+        "build"
+      ]
+    },
+    {
+      "q": "What AI systems have you built?",
+      "a": "At Orange Health Labs: Jarvis, a code-intelligence platform indexing 63 repositories with a vectorless hybrid RAG pipeline (tree-sitter, dependency graphs, BM25, FTS5) that raised answer accuracy from about 55% to about 90%, with 8+ agents on top (JIRA-to-PR, RCA investigator, PR reviewer, SQL agent); and Zest, which triages Freshdesk tickets and drafts replies with an LLM. Outside work: Hireish.",
+      "keywords": [
+        "ai",
+        "agents",
+        "agentic",
+        "jarvis",
+        "zest",
+        "rag",
+        "rags",
+        "harness",
+        "llm",
+        "genai"
+      ]
+    },
+    {
+      "q": "How do you reduce AI costs?",
+      "a": "On Hireish the levers were model routing (smaller models for realtime and evaluation, selectable per organisation), dropping silent audio before it is sent, trimming the system prompt, caching repeated LLM and embedding calls on SHA-256 keys, and tracking cost per interview. The documented projection is roughly $4.14 down to $0.70 per interview hour.",
+      "keywords": [
+        "cost",
+        "costs",
+        "token",
+        "tokens",
+        "optimise",
+        "optimize",
+        "optimisation",
+        "cheap",
+        "reduce",
+        "caching"
+      ]
+    },
+    {
+      "q": "What is SBANetwork?",
+      "a": "SBANetwork is a lightweight, CPU-based neural network library inspired by Keras, published on PyPI (pypi.org/project/sbanetwork) under the MIT licence. It has Dense and Dropout layers, six optimizers, fourteen activation functions and five loss functions.",
+      "keywords": [
+        "sbanetwork",
+        "sba",
+        "neural",
+        "keras",
+        "pypi"
+      ]
+    },
+    {
+      "q": "What is AllOne?",
+      "a": "AllOne is a secure password manager with a TOTP authenticator and AI-powered document search, available at allone.co.in.",
+      "keywords": [
+        "allone",
+        "password",
+        "authenticator",
+        "totp",
+        "vault"
+      ]
+    },
+    {
+      "q": "What is your backend experience?",
+      "a": "Abhishek is an SDE-1 at Orange Health Labs in Bangalore (since May 2026; Associate Software Engineer Aug 2025 to Apr 2026). He designed distributed Go backend systems for lab operations, built event-driven pipelines and a worker-consumer architecture on Redis and Memcache, cut report generation latency, and migrated reporting from Jinja2 to Marko.js.",
+      "keywords": [
+        "backend",
+        "experience",
+        "orange",
+        "go",
+        "golang",
+        "redis",
+        "sde",
+        "work"
+      ]
+    },
+    {
+      "q": "What is Roast My Resume?",
+      "a": "Roast My Resume is a free ATS resume checker from Hireish. You upload a PDF, get a score out of 100, see each mistake with the fix, and can get a rebuilt one-page resume.",
+      "keywords": [
+        "roast",
+        "resume",
+        "ats"
+      ]
+    }
+  ]
+}
