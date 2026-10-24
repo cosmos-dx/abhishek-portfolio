@@ -241,9 +241,9 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
       const ctx = canvas.getContext("2d")!;
       // Full-bleed hero (below lg): the orb moves to the top of the hero and the name block slides down beneath it
       const overlay = !matchMedia("(min-width: 1024px)").matches;
-      const R = Math.min(w, h) * (overlay ? 0.34 : 0.4);
+      const R = Math.min(w, h) * (overlay ? 0.32 : 0.37);
       const orbY = 64 + R * 1.55; // orb centre, measured from the top of the hero
-      const soff = overlay ? orbY - h / 2 : 0; // offset of the orb from the image centre
+      const soff = overlay ? orbY - h / 2 : -h * 0.14; // offset of the orb from the image centre; desktop sits a little high so it clears the text and panels
       const section = wrap!.closest("section");
       if (overlay && section) {
         const block = section.querySelector<HTMLElement>("[data-orb-shift]");
@@ -252,7 +252,7 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
         if (block && ps && ps.length) {
           const top = ps[0].getBoundingClientRect().top - r.top, bottom = ps[ps.length - 1].getBoundingClientRect().bottom - r.top;
           const room = icons ? icons.getBoundingClientRect().top - r.top - 12 - bottom : Infinity;
-          shiftPx = Math.max(0, Math.min(orbY + R * 1.3 + 14 - top, room));
+          shiftPx = Math.max(0, Math.min(orbY + R * 1.3 + 44 - top, room)); // 44px of air between the orb's shadow and the name
           shiftEl = block;
           // Inline styles on purpose: they don't depend on any stylesheet being up to date
           block.style.transition = "transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1)";
