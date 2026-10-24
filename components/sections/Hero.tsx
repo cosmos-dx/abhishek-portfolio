@@ -50,7 +50,7 @@ export function Hero({ profile }: { profile: Content["profile"] }) {
     <section id="hero" aria-labelledby="hero-title" className="relative border-b border-line">
       <div className="relative mx-auto grid min-h-[100svh] max-w-[1600px] lg:grid-cols-12">
         {/* Left: typography */}
-        <div className="relative flex flex-col px-5 pb-6 pt-6 sm:px-8 lg:col-span-7 lg:px-10 lg:pb-10">
+        <div className="relative flex flex-col px-5 pb-6 pt-14 sm:px-8 lg:col-span-7 lg:px-10 lg:pb-10 lg:pt-6">
           <div className={`label ml-auto text-right ${ink}`}>
             <div>{profile.coords}</div>
             <div>{profile.location}</div>

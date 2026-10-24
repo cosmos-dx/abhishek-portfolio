@@ -241,23 +241,30 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
       const ctx = canvas.getContext("2d")!;
       // Full-bleed hero (below lg): the orb moves to the top of the hero and the name block slides down beneath it
       const overlay = !matchMedia("(min-width: 1024px)").matches;
-      const R = Math.min(w, h) * (overlay ? 0.32 : 0.37);
-      const orbY = 64 + R * 1.55; // orb centre, measured from the top of the hero
-      const soff = overlay ? orbY - h / 2 : -h * 0.14; // offset of the orb from the image centre; desktop sits a little high so it clears the text and panels
+      // Phones split the hero in half: the orb (with its tag above and shadow below) lives in the top half, the name block
+      // slides down so it starts just below the middle, with a clear gap in between. Desktop: orb in the image column.
       const section = wrap!.closest("section");
+      let zoneTop = 0, zoneBottom = 0;
       if (overlay && section) {
         const block = section.querySelector<HTMLElement>("[data-orb-shift]");
         const ps = block?.querySelectorAll("p");
         const icons = section.querySelector<HTMLElement>("[data-orb-icons]");
-        if (block && ps && ps.length) {
+        const coords = block?.previousElementSibling as HTMLElement | null; // location row at the top
+        if (block && ps && ps.length && coords) {
           const top = ps[0].getBoundingClientRect().top - r.top, bottom = ps[ps.length - 1].getBoundingClientRect().bottom - r.top;
           const room = icons ? icons.getBoundingClientRect().top - r.top - 12 - bottom : Infinity;
-          shiftPx = Math.max(0, Math.min(orbY + R * 1.3 + 44 - top, room)); // 44px of air between the orb's shadow and the name
+          shiftPx = Math.max(0, Math.min(h * 0.5 + 28 - top, room)); // name block starts just under the middle, unless the icon row is in the way
           shiftEl = block;
+          zoneTop = coords.getBoundingClientRect().bottom - r.top + 10;
+          zoneBottom = top + shiftPx - 24; // 24px of air between the orb's shadow and the name
           // Inline styles on purpose: they don't depend on any stylesheet being up to date
           block.style.transition = "transform 900ms cubic-bezier(0.2, 0.7, 0.2, 1)";
         }
       }
+      const zoned = zoneBottom - zoneTop > 120;
+      // tag (1.5R above the centre) + orb + shadow (1.5R below) must fit the zone
+      const R = zoned ? Math.min((zoneBottom - zoneTop) / 3, w * 0.34) : Math.min(w, h) * (overlay ? 0.3 : 0.37);
+      const soff = zoned ? (zoneTop + zoneBottom) / 2 - h / 2 : overlay ? 64 + R * 1.55 - h / 2 : -h * 0.14; // offset of the orb from the image centre; desktop sits a little high so it clears the text and panels
       active = true; dir = 1; T = 0; spin = 0; shapeClock = 0;
       wrap!.style.visibility = "hidden";
       const font = `500 11px ${monoFont()}`;
