@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "Portfolio of Abhishek Gupta: backend systems and AI products built to scale and optimised for real-world use.",
 };
 
-export const viewport: Viewport = { themeColor: "#f5f3ed" };
+export const viewport: Viewport = { themeColor: "#f5f3ed", viewportFit: "cover" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
