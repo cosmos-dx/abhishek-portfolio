@@ -11,8 +11,10 @@ import { useEffect, useRef } from "react";
  * octahedron, then a sphere again, looping while the pointer stays on the image. Moving the pointer
  * off the image plays the whole thing in reverse. One timeline value T drives every shard, so reversing is exact.
  *
- * ponytail: plain 2D canvas with an affine texture per triangle (no three.js, no new dependency). Ceiling: ~840
- * triangles per frame; for a denser mesh or true perspective texturing, move to WebGL.
+ * ponytail: no three.js, no new dependency. Desktop draws an affine texture per triangle on a plain 2D canvas (~840
+ * triangles, fine with a GPU-backed 2D canvas). Phones draw the triangles with a tiny WebGL program instead: iOS Safari
+ * crawls on ~1500 clip()+drawImage() calls per frame. The 2D canvas still draws the overlays (shadow, rim, tag) on top,
+ * and is the fallback when WebGL is missing. Ceiling: affine texturing, edge glints are shader-side only.
  */
 
 const COLS = 16;
@@ -129,13 +131,55 @@ function build(w: number, h: number, ox: number, oy: number, vw: number, vh: num
   return insts;
 }
 
+const VERT = `attribute vec2 p;attribute vec2 u;attribute vec3 c;attribute vec3 b;uniform vec2 r;
+varying vec2 vu;varying vec3 vc;varying vec3 vb;
+void main(){gl_Position=vec4(p.x/r.x*2.-1.,1.-p.y/r.y*2.,0.,1.);vu=u;vc=c;vb=b;}`;
+// c = (darkness, alpha, edge glint); b = barycentric coords, so min(b) is the distance to the nearest triangle edge
+const FRAG = `precision highp float;uniform sampler2D t;varying vec2 vu;varying vec3 vc;varying vec3 vb;
+void main(){vec3 s=texture2D(t,vu).rgb*(1.-vc.x);float m=min(vb.x,min(vb.y,vb.z));
+s=mix(s,vec3(1.),(1.-smoothstep(0.,.07,m))*vc.z*.4);gl_FragColor=vec4(s*vc.y,vc.y);}`;
+
+/** Uploads the texture and returns a draw(vertices, count, viewportW, viewportH) fn (10 floats per vertex), or null. */
+function makeGL(gl: WebGLRenderingContext, tex: HTMLCanvasElement) {
+  const pr = gl.createProgram()!;
+  for (const [type, src] of [[gl.VERTEX_SHADER, VERT], [gl.FRAGMENT_SHADER, FRAG]] as const) {
+    const sh = gl.createShader(type)!;
+    gl.shaderSource(sh, src); gl.compileShader(sh); gl.attachShader(pr, sh);
+  }
+  gl.linkProgram(pr);
+  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return null;
+  gl.useProgram(pr);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); // required for non-power-of-two textures
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  [["p", 2, 0], ["u", 2, 8], ["c", 3, 16], ["b", 3, 28]].forEach(([n, size, off]) => {
+    const loc = gl.getAttribLocation(pr, n as string);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, size as number, gl.FLOAT, false, 40, off as number);
+  });
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // premultiplied
+  const r = gl.getUniformLocation(pr, "r");
+  return (buf: Float32Array, n: number, vw: number, vh: number) => {
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform2f(r, vw, vh);
+    gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.bufferData(gl.ARRAY_BUFFER, buf, gl.DYNAMIC_DRAW);
+    gl.drawArrays(gl.TRIANGLES, 0, n);
+  };
+}
+
 export function Shatter({ children, className }: { children: React.ReactNode; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const wrap = ref.current;
     if (!wrap) return;
-    let canvas: HTMLCanvasElement | null = null;
+    let canvas: HTMLCanvasElement | null = null, glCanvas: HTMLCanvasElement | null = null;
     let raf = 0, dwell = 0;
     let active = false, dir = 1, T = 0, clock = 0, spin = 0, shapeClock = 0;
     let ptr = { x: 0, y: 0 };
@@ -150,6 +194,9 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
       cancelAnimationFrame(raf);
       canvas?.remove();
       canvas = null;
+      glCanvas?.getContext("webgl")?.getExtension("WEBGL_lose_context")?.loseContext();
+      glCanvas?.remove();
+      glCanvas = null;
       wrap!.style.visibility = "";
       if (shiftEl) shiftEl.style.transform = "";
       shiftEl = null;
@@ -164,8 +211,10 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
       const r = wrap!.getBoundingClientRect();
       const w = Math.round(r.width), h = Math.round(r.height);
       const tapMode = !hoverMode();
-      const dpr = Math.min(tapMode ? 1.5 : 2, devicePixelRatio || 1);
       const vw = innerWidth, vh = innerHeight;
+      glCanvas = tapMode ? document.createElement("canvas") : null;
+      const glx = glCanvas?.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: true }) ?? null;
+      const dpr = Math.min(glx ? 2 : tapMode ? 1.5 : 2, devicePixelRatio || 1);
 
       // Texture: the image as it is displayed (object-fit: cover), at device resolution
       const tex = document.createElement("canvas");
@@ -175,11 +224,20 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
       const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
       tc.drawImage(img, ((w - dw) / 2) * dpr, ((h - dh) / 2) * dpr, dw * dpr, dh * dpr);
 
+      const draw = glx && makeGL(glx, tex);
       const insts = build(w, h, ptr.x, ptr.y, vw, vh, r.left, r.top, tapMode ? ROWS_TOUCH : ROWS);
+      // Size in px from innerWidth/innerHeight, not 100vw/100vh: on iOS 100vh is taller than the visible area, which stretched the orb into an egg
+      const layer = { position: "fixed", left: "0", top: "0", width: `${vw}px`, height: `${vh}px`, pointerEvents: "none", zIndex: "60" };
+      if (glCanvas && draw) {
+        glCanvas.width = vw * dpr; glCanvas.height = vh * dpr;
+        Object.assign(glCanvas.style, layer);
+        document.body.appendChild(glCanvas); // before the overlay canvas, so the overlay draws on top
+      }
       canvas = document.createElement("canvas");
       canvas.width = vw * dpr; canvas.height = vh * dpr;
-      Object.assign(canvas.style, { position: "fixed", inset: "0", width: "100vw", height: "100vh", pointerEvents: "none", zIndex: "60" });
+      Object.assign(canvas.style, layer);
       document.body.appendChild(canvas);
+      const buf = new Float32Array(insts.length * 30);
       const ctx = canvas.getContext("2d")!;
       // Full-bleed hero (below lg): the orb moves to the top of the hero and the name block slides down beneath it
       const overlay = !matchMedia("(min-width: 1024px)").matches;
@@ -288,8 +346,23 @@ export function Shatter({ children, className }: { children: React.ReactNode; cl
         }
 
         insts.sort((a, b) => a.z - b.z);
+        if (draw) {
+          let o = 0;
+          for (const q of insts) {
+            if (q.skip) continue;
+            const mx = (q.px[0] + q.px[1] + q.px[2]) / 3, my = (q.py[0] + q.py[1] + q.py[2]) / 3;
+            for (let i = 0; i < 3; i++) {
+              const vx = q.px[i] - mx, vy = q.py[i] - my, l = Math.hypot(vx, vy) || 1;
+              buf[o++] = q.px[i] + (vx / l) * 0.7; buf[o++] = q.py[i] + (vy / l) * 0.7; // pushed out so neighbours overlap, no seams
+              buf[o++] = q.sx[i] / w; buf[o++] = q.sy[i] / h;
+              buf[o++] = q.dark; buf[o++] = q.alpha; buf[o++] = q.edge;
+              buf[o++] = i === 0 ? 1 : 0; buf[o++] = i === 1 ? 1 : 0; buf[o++] = i === 2 ? 1 : 0;
+            }
+          }
+          draw(buf, o / 10, vw, vh);
+        }
         for (const q of insts) {
-          if (q.skip) continue;
+          if (draw || q.skip) continue;
           const [s0x, s0y] = [q.sx[0], q.sy[0]];
           const det = (q.sx[1] - s0x) * (q.sy[2] - s0y) - (q.sx[2] - s0x) * (q.sy[1] - s0y);
           if (Math.abs(det) < 1e-6) continue;
